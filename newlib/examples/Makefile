@@ -30,8 +30,15 @@ endif
 
 default: all
 
-all: hello jacobi
+all: shell hello jacobi
 
+shell: shell.o
+	@echo [LD] $@
+	$Q$(CC_FOR_TARGET) $(LDFLAGS) $(CFLAGS) -o $@ $<
+	$Q$(OBJCOPY_FOR_TARGET) $(KEEP_DEBUG) $@ $@.sym
+	$Q$(OBJCOPY_FOR_TARGET) $(STRIP_DEBUG) $@
+	$Qchmod a-x $@.sym
+    
 hello: hello.o
 	@echo [LD] $@
 	$Q$(CC_FOR_TARGET) $(LDFLAGS) $(CFLAGS) -o $@ $<
@@ -48,11 +55,11 @@ jacobi: jacobi.o
 
 clean:
 	@echo Cleaning examples
-	$Q$(RM) hello jacobi *.sym *.o *~ 
+	$Q$(RM) shell hello jacobi *.sym *.o *~ 
 
 veryclean:
 	@echo Propper cleaning examples
-	$Q$(RM) hello jacobi *.sym *.o *~
+	$Q$(RM) shell hello jacobi *.sym *.o *~
 
 depend:
 	$Q$(CC_FOR_TARGET) -MM $(CFLAGS) *.c > Makefile.dep
