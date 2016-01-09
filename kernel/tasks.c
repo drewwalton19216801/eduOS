@@ -152,6 +152,12 @@ void NORETURN sys_exit(int arg) {
 	do_exit(arg);
 }
 
+/** @brief Get the current task's id */
+int sys_getpid(void) {
+    return current_task->id;
+
+}
+
 /** @brief Aborting a task is like exiting it with result -1 */
 void NORETURN abort(void) {
 	do_exit(-1);

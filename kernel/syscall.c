@@ -107,6 +107,9 @@ ssize_t syscall_handler(uint32_t sys_nr, ...)
     case __NR_wait:
         ret = 0;
         break;
+    case __NR_getpid:
+        ret = sys_getpid();
+        break;
 	default:
 		kprintf("invalid system call: %u\n", sys_nr);
 		ret = -ENOSYS;

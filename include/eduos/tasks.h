@@ -47,6 +47,9 @@ extern "C" {
 /** @brief System call to terminate a user level process */
 void NORETURN sys_exit(int);
 
+/** @brief Get the current task's id */
+int sys_getpid(void);
+
 /** @brief Task switcher
  *
  * Timer-interrupted use of this function for task switching
@@ -68,14 +71,14 @@ size_t** scheduler(void);
  */
 int multitasking_init(void);
 
-/** @brief create a kernel-level task. 
+/** @brief create a kernel-level task.
  *
  * @param id The value behind this pointer will be set to the new task's id
  * @param ep Pointer to the entry function for the new task
  * @param args Arguments the task shall start with
  * @param prio Desired priority of the new kernel task
  *
- * @return 
+ * @return
  * - 0 on success
  * - -EINVAL (-22) on failure
  */
@@ -117,7 +120,7 @@ void finish_task_switch(void);
 
 /** @brief determine the highest priority of all tasks, which are ready
  *
- * @return 
+ * @return
  * - return highest priority
  * - if no task is ready, the function returns an invalid value (> MAX_PRIO)
  */
@@ -131,7 +134,7 @@ void reschedule(void);
 
 /** @brief Wake up a blocked task
  *
- * The task's status will be changed to TASK_READY 
+ * The task's status will be changed to TASK_READY
  *
  * @return
  * - 0 on success
