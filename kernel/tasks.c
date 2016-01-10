@@ -119,24 +119,33 @@ void finish_task_switch(void)
  * procedures which are called by exiting tasks. */
 static void NORETURN do_exit(int arg)
 {
-	task_t* curr_task = current_task;
+  int task_id;
+  
+  task_t* curr_task = current_task;
 
-	kprintf("Terminate task: %u, return value %d\n", curr_task->id, arg);
+  kprintf("Terminate task: %u, return value %d\n", curr_task->id, arg);
 
-	page_map_drop();
+  page_map_drop();
 
-	// decrease the number of active tasks
-	spinlock_irqsave_lock(&readyqueues.lock);
-	readyqueues.nr_tasks--;
-	spinlock_irqsave_unlock(&readyqueues.lock);
+  for (task_id = 0; task_id = MAX_TASKS; task_id++) {
+    task_t* task = &task_table[task_id];
+    if (task->status == TASK_IDLE && task->wait_id == curr_task->id) {
+      task->wait_id = -1;
+      task->status = TASK_READY;
+    }
+  }
+  // decrease the number of active tasks
+  spinlock_irqsave_lock(&readyqueues.lock);
+  readyqueues.nr_tasks--;
+  spinlock_irqsave_unlock(&readyqueues.lock);
 
-	curr_task->status = TASK_FINISHED;
-	reschedule();
+  curr_task->status = TASK_FINISHED;
+  reschedule();
 
-	kprintf("Kernel panic: scheduler found no valid task\n");
-	while(1) {
-		HALT;
-	}
+  kprintf("Kernel panic: scheduler found no valid task\n");
+  while(1) {
+    HALT;
+  }
 }
 
 /** @brief A procedure to be called by kernel tasks */
@@ -156,6 +165,14 @@ void NORETURN sys_exit(int arg) {
 int sys_getpid(void) {
     return current_task->id;
 
+}
+
+/** @brief Wait syscall */
+int sys_wait(int wait_pid) {
+  current_task->wait_id = wait_pid;
+  current_task->status = TASK_IDLE;
+  reschedule();
+  return 0;
 }
 
 /** @brief Aborting a task is like exiting it with result -1 */
@@ -187,6 +204,7 @@ int create_task(tid_t* id, entry_point_t ep, void* arg, uint8_t prio)
 			spinlock_init(&task_table[i].vma_lock);
 			task_table[i].vma_list = NULL;
 			task_table[i].heap = NULL;
+			task_table[i].wait_id = -1;
 
 			spinlock_irqsave_init(&task_table[i].page_lock);
 			atomic_int32_set(&task_table[i].user_usage, 0);
@@ -390,7 +408,7 @@ get_task_out:
 			orig_task->flags &= ~TASK_FPU_USED;
 		}
 
-		//kprintf("schedule from %u to %u with prio %u\n", orig_task->id, current_task->id, (uint32_t)current_task->prio);
+		kprintf("schedule from %u to %u with prio %u\n", orig_task->id, current_task->id, (uint32_t)current_task->prio);
 
 		return (size_t**) &(orig_task->last_stack_pointer);
 	}

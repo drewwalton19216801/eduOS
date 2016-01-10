@@ -99,6 +99,9 @@ typedef struct task {
 	struct task*	prev;
 	/// FPU state
 	union fpu_state	fpu;
+	
+	int wait_id;
+	int child_return_value;
 } task_t;
 
 typedef struct {

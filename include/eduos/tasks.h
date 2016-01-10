@@ -50,6 +50,9 @@ void NORETURN sys_exit(int);
 /** @brief Get the current task's id */
 int sys_getpid(void);
 
+/** @brief Wait syscall */
+int sys_wait(int wait_pid);
+
 /** @brief Task switcher
  *
  * Timer-interrupted use of this function for task switching
