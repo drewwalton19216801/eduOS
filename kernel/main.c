@@ -58,113 +58,53 @@ extern atomic_int32_t total_pages;
 extern atomic_int32_t total_allocated_pages;
 extern atomic_int32_t total_available_pages;
 
-#if 0
-// Demo of a user-level task
-static void NORETURN userfoo(void* arg)
-{
-	char str[] = "hello from userfoo\n";
-
-	SYSCALL3(__NR_write, 0, str, 20);
-	SYSCALL1(__NR_exit, 0);
-
-	while(1) ;
-}
-
-static char ustack[KERNEL_STACK_SIZE]  __attribute__ ((aligned (PAGE_SIZE)));
-
-static int wrapper(void* arg)
-{
-	size_t* stack = (size_t*) (ustack+KERNEL_STACK_SIZE-16);
-
-	memset(ustack, 0xCD, KERNEL_STACK_SIZE);
-	*stack-- = (size_t) arg;
-	*stack = (size_t) NULL; // put exit function as caller on the stack
-
-#if 0
-	// this triggers a page fault because a user task is not able to access the kernel space
-	return jump_to_user_code((size_t) userfoo, (size_t) stack);
-#else
-	// dirty hack, map userfoo to the user space
-	size_t phys = virt_to_phys(((size_t) userfoo) & PAGE_MASK);
-	size_t vuserfoo = KERNEL_SPACE+PAGE_SIZE;
-	page_map(vuserfoo, phys, 2, PG_PRESENT | PG_USER);
-	vuserfoo += (size_t)userfoo & (PAGE_SIZE-1);
-
-	// dirty hack, map ustack to the user space
-	phys = virt_to_phys((size_t) ustack);
-	size_t vstack = 3*KERNEL_SPACE;
-	page_map(vstack, phys, KERNEL_STACK_SIZE >> PAGE_BITS, PG_PRESENT | PG_RW | PG_USER);
-	vstack = (vstack + KERNEL_STACK_SIZE - 16);
-
-	return jump_to_user_code(vuserfoo, vstack);
-#endif
-}
-#endif
-
-static int foo(void* arg)
-{
-	int i;
-
-	for(i=0; i<2; i++) {
-		kprintf("hello from %s\n", (char*) arg);
-	}
-
-	// demo of an exception
-	/*i = 0;
-	i = 32 / i;
-	kprintf("i = %d\n", i);*/
-
-	return 0;
-}
-
 static int eduos_init(void)
 {
-	// initialize .bss section
-	memset((void*)&bss_start, 0x00, ((size_t) &bss_end - (size_t) &bss_start));
+  // initialize .bss section
+  memset((void*)&bss_start, 0x00, ((size_t) &bss_end - (size_t) &bss_start));
 
-	koutput_init();
-	system_init();
-	irq_init();
-	timer_init();
-	multitasking_init();
-	memory_init();
+  koutput_init();
+  system_init();
+  irq_init();
+  timer_init();
+  multitasking_init();
+  memory_init();
 #ifdef CONFIG_UART
-	uart_init();
+  uart_init();
 #endif
-	initrd_init();
+  initrd_init();
 
-	return 0;
+  return 0;
 }
 
 int main(void)
 {
-	char* argv1[] = {"/bin/shell", NULL};
+  char* argv1[] = {"/bin/shell", NULL};
 
-	eduos_init();
-	system_calibration(); // enables also interrupts
+  eduos_init();
+  system_calibration(); // enables also interrupts
 
-	kprintf("This is eduOS %s Build %u, %u\n", EDUOS_VERSION, &__BUILD_DATE, &__BUILD_TIME);
-	kprintf("Kernel starts at %p and ends at %p\n", &kernel_start, &kernel_end);
-	kprintf("Processor frequency: %u MHz\n", get_cpu_frequency());
-	kprintf("Total memory: %lu KiB\n", atomic_int32_read(&total_pages) * PAGE_SIZE / 1024);
-	kprintf("Current allocated memory: %lu KiB\n", atomic_int32_read(&total_allocated_pages) * PAGE_SIZE / 1024);
-	kprintf("Current available memory: %lu KiB\n", atomic_int32_read(&total_available_pages) * PAGE_SIZE / 1024);
+  kprintf("This is eduOS %s Build %u, %u\n", EDUOS_VERSION, &__BUILD_DATE, &__BUILD_TIME);
+  kprintf("Kernel starts at %p and ends at %p\n", &kernel_start, &kernel_end);
+  kprintf("Processor frequency: %u MHz\n", get_cpu_frequency());
+  kprintf("Total memory: %lu KiB\n", atomic_int32_read(&total_pages) * PAGE_SIZE / 1024);
+  kprintf("Current allocated memory: %lu KiB\n", atomic_int32_read(&total_allocated_pages) * PAGE_SIZE / 1024);
+  kprintf("Current available memory: %lu KiB\n", atomic_int32_read(&total_available_pages) * PAGE_SIZE / 1024);
 
-	//vma_dump();
+  //vma_dump();
 
-	create_user_task(NULL, "/bin/shell", argv1);
-
+  create_user_task(NULL, "/bin/shell", argv1);
 #if 0
-	kputs("Filesystem:\n");
-	list_fs(fs_root, 1);
+  kputs("Filesystem:\n");
+  list_fs(fs_root, 1);
 #endif
 
-	// x64: wrapper maps function to user space to start a user-space task
-	//create_kernel_task(NULL, wrapper, "userfoo", NORMAL_PRIO);
+  // x64: wrapper maps function to user space to start a user-space task
+  //create_kernel_task(NULL, wrapper, "userfoo", NORMAL_PRIO);
 
-	while(1) { 
-		HALT;
-	}
+  while(1) {
+    HALT;
+  }
 
-	return 0;
+  return 0;
 }

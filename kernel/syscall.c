@@ -34,89 +34,87 @@
 
 static int sys_write(int fd, const char* buf, size_t len)
 {
-	//TODO: Currently, we ignore the file descriptor
+  //TODO: Currently, we ignore the file descriptor
 
-	if (BUILTIN_EXPECT(!buf, 0))
-		return -1;
+  if (BUILTIN_EXPECT(!buf, 0))
+    return -1;
 
-	kputs(buf);
+  kputs(buf);
 
-	return 0;
+  return 0;
 }
 
 static ssize_t sys_sbrk(int incr)
 {
-	task_t* task = current_task;
-	vma_t* heap = task->heap;
-	ssize_t ret;
+  task_t* task = current_task;
+  vma_t* heap = task->heap;
+  ssize_t ret;
 
-	spinlock_lock(&task->vma_lock);
+  spinlock_lock(&task->vma_lock);
 
-	if (BUILTIN_EXPECT(!heap, 0)) {
-		kprintf("sys_sbrk: missing heap!\n");
-		abort();
-	}
+  if (BUILTIN_EXPECT(!heap, 0)) {
+    kprintf("sys_sbrk: missing heap!\n");
+    abort();
+  }
 
-	ret = heap->end;
-	heap->end += incr;
-	if (heap->end < heap->start)
-		heap->end = heap->start;
+  ret = heap->end;
+  heap->end += incr;
+  if (heap->end < heap->start)
+    heap->end = heap->start;
 
-	// allocation and mapping of new pages for the heap
-	// is catched by the pagefault handler
+  // allocation and mapping of new pages for the heap
+  // is catched by the pagefault handler
 
-	spinlock_unlock(&task->vma_lock);
+  spinlock_unlock(&task->vma_lock);
 
-	return ret;
+  return ret;
 }
 
 ssize_t syscall_handler(uint32_t sys_nr, ...)
 {
-	ssize_t ret = -EINVAL;
-	va_list vl;
-
-	va_start(vl, sys_nr);
-
-	switch(sys_nr)
-	{
-	case __NR_exit:
-		sys_exit(va_arg(vl, uint32_t));
-		ret = 0;
-		break;
-	case __NR_write: {
-		int fd = va_arg(vl, int);
-		const char* buf = va_arg(vl, const char*);
-		size_t len = va_arg(vl, size_t);
-		ret = sys_write(fd, buf, len);
-		break;
-	}
-	//TODO: Currently, we ignore file descriptors
-	case __NR_open:
-	case __NR_close:
-		ret = 0;
-		break;
-	case __NR_sbrk: {
-		int incr = va_arg(vl, int);
-
-		ret = sys_sbrk(incr);
-		break;
-	}
+  ssize_t ret = -EINVAL;
+  va_list vl;
+  
+  va_start(vl, sys_nr);
+  
+  switch(sys_nr)
+  {
+    case __NR_exit:
+      sys_exit(va_arg(vl, uint32_t));
+      ret = 0;
+      break;
+    case __NR_write: {
+      int fd = va_arg(vl, int);
+      const char* buf = va_arg(vl, const char*);
+      size_t len = va_arg(vl, size_t);
+      ret = sys_write(fd, buf, len);
+      break;
+    }
+    //TODO: Currently, we ignore file descriptors
+    case __NR_open:
+    case __NR_close:
+      ret = 0;
+      break;
+    case __NR_sbrk: {
+      int incr = va_arg(vl, int);
+      ret = sys_sbrk(incr);
+      break;
+    }
     case __NR_fork:
-        ret = 0;
-        break;
+      ret = 0;
+      break;
     case __NR_wait:
-        ret = 0;
-        break;
+      ret = 0;
+      break;
     case __NR_getpid:
-        ret = sys_getpid();
-        break;
-	default:
-		kprintf("invalid system call: %u\n", sys_nr);
-		ret = -ENOSYS;
-		break;
-	};
-
-	va_end(vl);
-
-	return ret;
+      ret = sys_getpid();
+      break;
+    default:
+      kprintf("invalid system call: %u\n", sys_nr);
+      ret = -ENOSYS;
+      break;
+  };
+  va_end(vl);
+  return ret;
 }
+
