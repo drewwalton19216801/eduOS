@@ -326,53 +326,53 @@ static int load_task(load_args_t* largs)
     while(((char*) stack)[idx] != '\0')
       idx++;
       idx++;
-    }
+  }
 
-    // push env on the stack
-    offset -= (largs->envc+1) * sizeof(char*);
-    for(i=0; i<largs->envc; i++) {
-      ((char**) (stack+offset))[i] = (char*) (stack+idx);
+  // push env on the stack
+  offset -= (largs->envc+1) * sizeof(char*);
+  for(i=0; i<largs->envc; i++) {
+    ((char**) (stack+offset))[i] = (char*) (stack+idx);
 
-      while(((char*) stack)[idx] != '\0')
-	idx++;
-	idx++;
-    }
-    ((char**) (stack+offset))[largs->envc] = NULL;
+    while(((char*) stack)[idx] != '\0')
+    idx++;
+    idx++;
+  }
+  ((char**) (stack+offset))[largs->envc] = NULL;
 
-    // push pointer to env
-    offset -= sizeof(char**);
-    if (!(largs->envc))
-      *((char***) (stack+offset)) = NULL;
-    else
-      *((char***) (stack+offset)) = (char**) (stack + offset + sizeof(char**));
+  // push pointer to env
+  offset -= sizeof(char**);
+  if (!(largs->envc))
+    *((char***) (stack+offset)) = NULL;
+  else
+    *((char***) (stack+offset)) = (char**) (stack + offset + sizeof(char**));
 
-    // push pointer to argv
-    offset -= sizeof(char**);
-    *((char***) (stack+offset)) = (char**) (stack + offset + 2*sizeof(char**) + (largs->envc+1) * sizeof(char*));
+  // push pointer to argv
+  offset -= sizeof(char**);
+  *((char***) (stack+offset)) = (char**) (stack + offset + 2*sizeof(char**) + (largs->envc+1) * sizeof(char*));
 
-    // push argc on the stack
-    offset -= sizeof(ssize_t);
-    *((ssize_t*) (stack+offset)) = (ssize_t) largs->argc;
+  // push argc on the stack
+  offset -= sizeof(ssize_t);
+  *((ssize_t*) (stack+offset)) = (ssize_t) largs->argc;
 
-    kfree(largs);
+  kfree(largs);
 
-    // clear fpu state => currently not supported
-    curr_task->flags &= ~(TASK_FPU_USED|TASK_FPU_INIT);
+  // clear fpu state => currently not supported
+  curr_task->flags &= ~(TASK_FPU_USED|TASK_FPU_INIT);
 
-    jump_to_user_code(header.entry, stack+offset);
+  jump_to_user_code(header.entry, stack+offset);
 
-    return 0;
+  return 0;
 
 invalid:
-    kprintf("Invalid executable!\n");
-    kprintf("magic number 0x%x\n", (uint32_t) header.ident.magic);
-    kprintf("header type 0x%x\n", (uint32_t) header.type);
-    kprintf("machine type 0x%x\n", (uint32_t) header.machine);
-    kprintf("elf ident class 0x%x\n", (uint32_t) header.ident._class);
-    kprintf("elf identdata 0x%x\n", header.ident.data);
-    kprintf("program entry point 0x%lx\n", (size_t) header.entry);
+  kprintf("Invalid executable!\n");
+  kprintf("magic number 0x%x\n", (uint32_t) header.ident.magic);
+  kprintf("header type 0x%x\n", (uint32_t) header.type);
+  kprintf("machine type 0x%x\n", (uint32_t) header.machine);
+  kprintf("elf ident class 0x%x\n", (uint32_t) header.ident._class);
+  kprintf("elf identdata 0x%x\n", header.ident.data);
+  kprintf("program entry point 0x%lx\n", (size_t) header.entry);
 
-    return -EINVAL;
+  return -EINVAL;
 }
 
 /** @brief This call is used to adapt create_task calls
