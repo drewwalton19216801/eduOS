@@ -37,8 +37,7 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (fstat, (fildes, st),
-        int          fildes _AND
+_fstat (int          fildes,
         struct stat *st)
 {
 	st->st_mode = S_IFCHR;

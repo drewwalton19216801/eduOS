@@ -34,8 +34,7 @@ extern int errno;
 #include "warning.h"
 
 int
-_DEFUN (_kill, (pid, sig),
-        int pid  _AND
+_kill (int pid,
         int sig)
 {
 	errno = EINVAL;

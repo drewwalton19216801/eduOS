@@ -29,31 +29,37 @@
 
 /*
 FUNCTION
-	<<towupper>>---translate wide characters to uppercase
+	<<towupper>>, <<towupper_l>>---translate wide characters to uppercase
 
 INDEX
 	towupper
 
-ANSI_SYNOPSIS
+INDEX
+	towupper_l
+
+SYNOPSIS
 	#include <wctype.h>
 	wint_t towupper(wint_t <[c]>);
 
-TRAD_SYNOPSIS
 	#include <wctype.h>
-	wint_t towupper(<[c]>)
-	wint_t <[c]>;
+	wint_t towupper_l(wint_t <[c]>, locale_t <[locale]>);
 
 
 DESCRIPTION
 <<towupper>> is a function which converts lowercase wide characters to
 uppercase, leaving all other characters unchanged.
 
+<<towupper_l>> is like <<towupper>> but performs the function based on the
+locale specified by the locale object locale.  If <[locale]> is
+LC_GLOBAL_LOCALE or not a valid locale object, the behaviour is undefined.
+
 RETURNS
-<<towupper>> returns the uppercase equivalent of <[c]> when it is a
+<<towupper>>, <<towupper_l>> return the uppercase equivalent of <[c]> when it is a
 lowercase wide character, otherwise, it returns the input character.
 
 PORTABILITY
 <<towupper>> is C99.
+<<towupper_l>> is POSIX-1.2008.
 
 No supporting OS subroutines are required.
 */
@@ -67,7 +73,7 @@ No supporting OS subroutines are required.
 #include "local.h"
 
 wint_t
-_DEFUN(towupper,(c), wint_t c)
+towupper (wint_t c)
 {
 #ifdef _MB_CAPABLE
   c = _jp2uc (c);
@@ -386,9 +392,6 @@ _DEFUN(towupper,(c), wint_t c)
       
       if (c == 0x04cf)
       	return 0x04c0;
-
-      if (c >= 0x04f7 && c <= 0x04f9)
-	return (c - 1);
     }
   else if (c < 0x0600)
     {

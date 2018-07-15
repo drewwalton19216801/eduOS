@@ -42,9 +42,9 @@
 #include <asm/isrs.h>
 #include <asm/io.h>
 
-/* 
+/*
  * These are our own ISRs that point to our special IRQ handler
- * instead of the regular 'fault_handler' function 
+ * instead of the regular 'fault_handler' function
  */
 extern void irq0(void);
 extern void irq1(void);
@@ -116,21 +116,32 @@ int irq_uninstall_handler(unsigned int irq)
  * actually happening. We send commands to the Programmable
  * Interrupt Controller (PICs - also called the 8259's) in
  * order to make IRQ0 to 15 be remapped to IDT entries 32 to
- * 47 
+ * 47
  */
 static int irq_remap(void)
 {
-	outportb(0x20, 0x11);
-	outportb(0xA0, 0x11);
-	outportb(0x21, 0x20);
-	outportb(0xA1, 0x28);
-	outportb(0x21, 0x04);
-	outportb(0xA1, 0x02);
-	outportb(0x21, 0x01);
-	outportb(0xA1, 0x01);
-	outportb(0x21, 0x0);
-	outportb(0xA1, 0x0);
+	// outportb(0x20, 0x11);
+	// outportb(0xA0, 0x11);
+	// outportb(0x21, 0x20);
+	// outportb(0xA1, 0x28);
+	// outportb(0x21, 0x04);
+	// outportb(0xA1, 0x02);
+	// outportb(0x21, 0x01);
+	// outportb(0xA1, 0x01);
+	// outportb(0x21, 0x0);
+	// outportb(0xA1, 0x0);
+	outportb(PIC1_COMMAND, ICW1_INIT + ICW1_ICW4);	// ICW1
+	outportb(PIC2_COMMAND, ICW1_INIT + ICW1_ICW4);	// ICW1
+	outportb(PIC1_DATA, PIC1_OFFSET);				// ICW2
+	outportb(PIC2_DATA, PIC2_OFFSET);				// ICW2
+	outportb(PIC1_DATA, 4);							// ICW3: tell Master PIC that there is a slave PIC at IRQ2(0000 0100)
+	outportb(PIC2_DATA, 2);							// ICW3: tell Slave PIC its cascade identity (0000 0010)
+	outportb(PIC1_DATA, ICW4_8086);
+	outportb(PIC2_DATA, ICW4_8086);
 
+	// write mask enable all interrupt
+	outportb(PIC1_DATA, 0x0);
+	outportb(PIC2_DATA, 0x0);
 	return 0;
 }
 
@@ -222,10 +233,10 @@ int irq_init(void)
  * Each of the IRQ ISRs point to this function, rather than
  * the 'fault_handler' in 'isrs.c'. The IRQ Controllers need
  * to be told when you are done servicing them, so you need
- * to send them an "End of Interrupt" command. If we use the PIC 
- * instead of the APIC, we have two 8259 chips: The first one 
- * exists at 0x20, the second one exists at 0xA0. If the second 
- * controller (an IRQ from 8 to 15) gets an interrupt, you need to 
+ * to send them an "End of Interrupt" command. If we use the PIC
+ * instead of the APIC, we have two 8259 chips: The first one
+ * exists at 0x20, the second one exists at 0xA0. If the second
+ * controller (an IRQ from 8 to 15) gets an interrupt, you need to
  * acknowledge the interrupt at BOTH controllers, otherwise, you
  * only send an EOI command to the first controller. If you don't send
  * an EOI, it won't raise any more IRQs.
@@ -238,17 +249,17 @@ size_t** irq_handler(struct state *s)
 	/* This is a blank function pointer */
 	void (*handler) (struct state * s);
 
-	/* 
+	/*
 	 * Find out if we have a custom handler to run for this
-	 * IRQ and then finally, run it 
-	 */	
+	 * IRQ and then finally, run it
+	 */
 	if (BUILTIN_EXPECT(s->int_no < MAX_HANDLERS, 1)) {
 		handler = irq_routines[s->int_no];
 		if (handler)
 			handler(s);
 	} else kprintf("Invalid interrupt number %d\n", s->int_no);
 
-	/* 
+	/*
 	 * If the IDT entry that was invoked was greater-than-or-equal to 48,
 	 * then we use the APIC
 	 */
@@ -258,16 +269,16 @@ size_t** irq_handler(struct state *s)
 	}
 
 	/*
-	 * If the IDT entry that was invoked was greater-than-or-equal to 40 
-	 * and lower than 48 (meaning IRQ8 - 15), then we need to 
+	 * If the IDT entry that was invoked was greater-than-or-equal to 40
+	 * and lower than 48 (meaning IRQ8 - 15), then we need to
 	 * send an EOI to the slave controller of the PIC
 	 */
 	if (s->int_no >= 40)
 		outportb(0xA0, 0x20);
 
-	/* 
+	/*
 	 * In either case, we need to send an EOI to the master
-	 * interrupt controller of the PIC, too 
+	 * interrupt controller of the PIC, too
 	 */
 	outportb(0x20, 0x20);
 

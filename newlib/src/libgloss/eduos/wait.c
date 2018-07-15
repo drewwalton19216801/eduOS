@@ -35,8 +35,7 @@ extern int errno;
 #include "warning.h"
 
 int
-_DEFUN (_wait, (status),
-        int  *status)
+_wait (int  *status)
 {
 	int ret;
 

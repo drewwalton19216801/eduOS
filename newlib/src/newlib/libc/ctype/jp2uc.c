@@ -48,7 +48,7 @@
 #define JP_EUCJP	3
 
 static wint_t
-_DEFUN (__jp2uc, (c, type), wint_t c _AND int type)
+__jp2uc (wint_t c, int type)
 {
   int index, adj;
   unsigned char byte1, byte2;
@@ -152,13 +152,13 @@ _DEFUN (__jp2uc, (c, type), wint_t c _AND int type)
 }
 
 wint_t
-_DEFUN (_jp2uc, (c), wint_t c)
+_jp2uc (wint_t c)
 {
-  if (!strcmp (__locale_charset (), "JIS"))
+  if (!strcmp (__current_locale_charset (), "JIS"))
     c = __jp2uc (c, JP_JIS);
-  else if (!strcmp (__locale_charset (), "SJIS"))
+  else if (!strcmp (__current_locale_charset (), "SJIS"))
     c = __jp2uc (c, JP_SJIS);
-  else if (!strcmp (__locale_charset (), "EUCJP"))
+  else if (!strcmp (__current_locale_charset (), "EUCJP"))
     c = __jp2uc (c, JP_EUCJP);
   return c;
 }

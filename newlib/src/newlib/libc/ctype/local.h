@@ -1,6 +1,7 @@
 /* wctrans constants */
 
 #include <_ansi.h>
+#include "../locale/setlocale.h"
 
 /* valid values for wctrans_t */
 #define WCT_TOLOWER 1
@@ -20,13 +21,11 @@
 #define WC_UPPER	11
 #define WC_XDIGIT	12
 
-extern char *__locale_charset(_NOARGS);
-
 /* internal function to translate JP to Unicode */
 #ifdef __CYGWIN__
 /* Under Cygwin, the incoming wide character is already given in UTF due
    to the requirements of the underlying OS. */
 #define _jp2uc(c) (c)
 #else
-wint_t _EXFUN (_jp2uc, (wint_t));
+wint_t _jp2uc (wint_t);
 #endif

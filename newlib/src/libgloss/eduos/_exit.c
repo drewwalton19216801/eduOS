@@ -32,14 +32,13 @@
 #undef errno
 extern int errno;
 
-_VOID
-_DEFUN (_exit, (rc),
-	int rc)
+void
+_exit (int rc)
 {
 	int ret;
 
 	/* task exit */
-	ret = SYSCALL1(__NR_exit, rc); 
+	ret = SYSCALL1(__NR_exit, rc);
 	if (ret < 0)
 		errno = -ret;
 

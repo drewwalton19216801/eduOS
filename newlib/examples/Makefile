@@ -26,7 +26,7 @@ endif
 # other implicit rules
 %.o : %.c
 	@echo [CC] $@
-	$Q$(CC_FOR_TARGET) -c $(CFLAGS) -o $@ $< 
+	$Q$(CC_FOR_TARGET) -c $(CFLAGS) -o $@ $<
 
 default: all
 
@@ -38,7 +38,7 @@ shell: shell.o
 	$Q$(OBJCOPY_FOR_TARGET) $(KEEP_DEBUG) $@ $@.sym
 	$Q$(OBJCOPY_FOR_TARGET) $(STRIP_DEBUG) $@
 	$Qchmod a-x $@.sym
-    
+
 hello: hello.o
 	@echo [LD] $@
 	$Q$(CC_FOR_TARGET) $(LDFLAGS) $(CFLAGS) -o $@ $<
@@ -55,7 +55,7 @@ jacobi: jacobi.o
 
 clean:
 	@echo Cleaning examples
-	$Q$(RM) shell hello jacobi *.sym *.o *~ 
+	$Q$(RM) shell hello jacobi *.sym *.o *~
 
 veryclean:
 	@echo Propper cleaning examples

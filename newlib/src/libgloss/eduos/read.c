@@ -35,9 +35,8 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (_read, (file, ptr, len),
-        int   file  _AND
-        char *ptr   _AND
+_read (int   file,
+        char *ptr,
         int   len)
 {
 	int ret;

@@ -33,9 +33,9 @@ extern int errno;
 #include "warning.h"
 #include "syscall.h"
 
-void*
-_DEFUN (sbrk, (incr),
-        int incr)
+void *
+_sbrk (incr)
+     int incr;
 {
 	int ret;
 
@@ -46,4 +46,4 @@ _DEFUN (sbrk, (incr),
 	}
 
 	return (void*) ret;
-} 
+}

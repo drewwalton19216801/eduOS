@@ -41,8 +41,7 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (stat, (file, st),
-        const char  *file _AND
+_stat (const char  *file,
         struct stat *st)
 {
 	int ret;
@@ -57,6 +56,6 @@ _DEFUN (stat, (file, st),
 		errno = -ret;
 		return -1;
 	}
-	
+
 	return 0;
 }

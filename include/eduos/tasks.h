@@ -44,6 +44,8 @@
 extern "C" {
 #endif
 
+#define TASK_TIME 50
+
 /** @brief System call to terminate a user level process */
 void NORETURN sys_exit(int);
 

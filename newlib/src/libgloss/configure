@@ -666,6 +666,7 @@ CCAS
 CCASFLAGS'
 ac_subdirs_all='doc
 aarch64
+arc
 epiphany
 eduos
 i386
@@ -679,6 +680,7 @@ sparc_leon
 sparc
 wince
 mips
+riscv
 rs6000
 mn10200
 mn10300
@@ -689,6 +691,7 @@ crx
 d30v
 fr30
 frv
+ft32
 lm32
 mcore
 mep
@@ -696,6 +699,7 @@ moxie
 microblaze
 mt
 v850
+visium
 xc16x
 xstormy16
 m32c
@@ -2397,15 +2401,19 @@ config_libnosys=true
 
 case "${target}" in
   *-eduos-elf*)
-	subdirs="$subdirs eduos"
+    subdirs="$subdirs eduos"
 
-	config_testsuite=false
-	config_libnosys=false
-	;;
+    config_testsuite=false
+    config_libnosys=false
+    ;;
   aarch64*-*-*)
 	subdirs="$subdirs aarch64"
 
 	config_testsuite=true
+	;;
+  arc*-*-*)
+	subdirs="$subdirs arc"
+
 	;;
   epiphany-*-*)
 	subdirs="$subdirs epiphany"
@@ -2456,6 +2464,10 @@ case "${target}" in
 	subdirs="$subdirs mips"
 
 	;;
+  riscv*-*-*)
+	subdirs="$subdirs riscv"
+
+	;;
   powerpc-*-*|powerpcle-*-*)
 	subdirs="$subdirs rs6000"
 
@@ -2496,6 +2508,10 @@ case "${target}" in
 	subdirs="$subdirs frv"
 
 	;;
+  ft32*-*-*)
+	subdirs="$subdirs ft32"
+
+	;;
   lm32*-*-*)
 	subdirs="$subdirs lm32"
 
@@ -2524,6 +2540,11 @@ case "${target}" in
         subdirs="$subdirs v850"
 
         ;;
+  visium-*-*)
+	subdirs="$subdirs visium"
+
+	config_testsuite=false
+	;;
   xc16x-*-*)
 	subdirs="$subdirs xc16x"
 
@@ -2539,6 +2560,7 @@ case "${target}" in
   msp430*-*-elf)
 	subdirs="$subdirs msp430"
 
+	config_libnosys=false
 	;;
   rl78*-*-elf)
 	subdirs="$subdirs rl78"

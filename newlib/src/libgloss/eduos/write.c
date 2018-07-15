@@ -35,14 +35,13 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (write, (file, ptr, len),
-        int   file  _AND
-        char *ptr   _AND
+_write (int   file,
+        char *ptr,
         int   len)
 {
-	int ret; 
+	int ret;
 
-        ret = SYSCALL3(__NR_write, file, ptr, len); 
+        ret = SYSCALL3(__NR_write, file, ptr, len);
 	if (ret < 0) {
 		errno = -ret;
 		ret = -1;

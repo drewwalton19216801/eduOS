@@ -35,8 +35,7 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (_getpid, (),
-        _NOARGS)
+_getpid (void)
 {
 	int ret;
 

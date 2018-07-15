@@ -35,9 +35,9 @@
 #include <asm/vga.h>
 #include <asm/io.h>
 
-/* 
+/*
  * This will keep track of how many ticks the system
- * has been running for 
+ * has been running for
  */
 static volatile uint64_t timer_ticks = 0;
 
@@ -46,10 +46,10 @@ uint64_t get_clock_tick(void)
 	return timer_ticks;
 }
 
-/* 
+/*
  * Handles the timer. In this case, it's very simple: We
  * increment the 'timer_ticks' variable every time the
- * timer fires. 
+ * timer fires.
  */
 static void timer_handler(struct state *s)
 {
@@ -63,6 +63,10 @@ static void timer_handler(struct state *s)
 	//if (timer_ticks % TIMER_FREQ == 0) {
 	//	vga_puts("One second has passed\n");
 	//}
+	if (timer_ticks % TASK_TIME == 0) {
+		//rechedule();
+		vga_puts("One second has passed\n");
+	}
 }
 
 #define LATCH(f)	((CLOCK_TICK_RATE + f/2) / f)
@@ -70,13 +74,13 @@ static void timer_handler(struct state *s)
 			      while(rdtsc() - start < 1000000) ; \
 			} while (0)
 
-/* 
+/*
  * Sets up the system clock by installing the timer handler
- * into IRQ0 
+ * into IRQ0
  */
 int timer_init(void)
 {
-	/* 
+	/*
 	 * Installs 'timer_handler' for the PIC and APIC timer,
 	 * only one handler will be later used.
 	 */

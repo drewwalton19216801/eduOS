@@ -35,9 +35,7 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (dup2, (fildes, fildes2),
-        int fildes _AND
-	int fildes2)
+_dup2 (int fildes, int fildes2)
 {
 	int ret;
 

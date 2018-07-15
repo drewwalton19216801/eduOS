@@ -35,8 +35,7 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (close, (fildes),
-        int fildes)
+_close (int fildes)
 {
 	int ret;
 

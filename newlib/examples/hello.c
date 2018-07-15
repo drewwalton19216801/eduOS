@@ -35,14 +35,9 @@ extern int errno;
 
 int main(int argc, char** argv)
 {
-	int i;
-
 	printf("Hello World!!!\n");
-	printf("This is my PID (should be 2): %d\n", getpid());
-	//r(i=0; environ[i]; i++)
-		//intf("environ[%d] = %s\n", i, environ[i]);
-	//for(i=0; i<argc; i++)
-		//printf("argv[%d] = %s\n", i, argv[i]);
+	printf("argc = %d\n", argc);
+	printf("argv[0] = %s\n", argv[0]);
 
 	return 0;
 }

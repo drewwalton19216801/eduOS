@@ -29,29 +29,35 @@
 
 /*
 FUNCTION
-	<<iswprint>>---printable wide character test
+	<<iswprint>>, <<iswprint_l>>---printable wide character test
 
 INDEX
 	iswprint
 
-ANSI_SYNOPSIS
+INDEX
+	iswprint_l
+
+SYNOPSIS
 	#include <wctype.h>
 	int iswprint(wint_t <[c]>);
 
-TRAD_SYNOPSIS
 	#include <wctype.h>
-	int iswprint(<[c]>)
-	wint_t <[c]>;
+	int iswprint_l(wint_t <[c]>, locale_t <[locale]>);
 
 DESCRIPTION
 <<iswprint>> is a function which classifies wide-character values that
 are printable.
 
+<<iswprint_l>> is like <<iswprint>> but performs the check based on the
+locale specified by the locale object locale.  If <[locale]> is
+LC_GLOBAL_LOCALE or not a valid locale object, the behaviour is undefined.
+
 RETURNS
-<<iswprint>> returns non-zero if <[c]> is a printable wide character.
+<<iswprint>>, <<iswprint_l>> return non-zero if <[c]> is a printable wide character.
 
 PORTABILITY
 <<iswprint>> is C99.
+<<iswprint_l>> is POSIX-1.2008.
 
 No supporting OS subroutines are required.
 */
@@ -67,7 +73,7 @@ No supporting OS subroutines are required.
 #endif /* _MB_CAPABLE */
 
 int
-_DEFUN(iswprint,(c), wint_t c)
+iswprint (wint_t c)
 {
 #ifdef _MB_CAPABLE
   unsigned const char *table;
@@ -493,4 +499,3 @@ _DEFUN(iswprint,(c), wint_t c)
   return (c < (wint_t)0x100 ? isprint (c) : 0);
 #endif /* _MB_CAPABLE */
 }
-

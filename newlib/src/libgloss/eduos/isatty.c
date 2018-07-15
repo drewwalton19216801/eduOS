@@ -34,8 +34,7 @@ extern int errno;
 #include "warning.h"
 
 int
-_DEFUN (isatty, (file),
-        int file)
+_isatty (int file)
 {
 	return (file < 3);
 }

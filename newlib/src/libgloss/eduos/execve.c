@@ -35,9 +35,8 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (_execve, (name, argv, env),
-        char  *name  _AND
-        char **argv  _AND
+_execve (char  *name,
+        char **argv,
         char **env)
 {
 	int ret;

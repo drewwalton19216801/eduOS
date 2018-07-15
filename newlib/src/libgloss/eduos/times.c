@@ -35,8 +35,7 @@ extern int errno;
 #include "syscall.h"
 
 clock_t
-_DEFUN (_times, (buf),
-        struct tms *buf)
+_times (struct tms *buf)
 {
 	clock_t clock = 0;
 	int ret;

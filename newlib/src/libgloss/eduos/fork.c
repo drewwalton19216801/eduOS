@@ -35,8 +35,7 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (_fork, (),
-        _NOARGS)
+_fork (void)
 {
 	int ret;
 

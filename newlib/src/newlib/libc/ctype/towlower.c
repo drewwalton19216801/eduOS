@@ -29,31 +29,37 @@
 
 /*
 FUNCTION
-	<<towlower>>---translate wide characters to lowercase
+	<<towlower>>, <<towlower_l>>---translate wide characters to lowercase
 
 INDEX
 	towlower
 
-ANSI_SYNOPSIS
+INDEX
+	towlower_l
+
+SYNOPSIS
 	#include <wctype.h>
 	wint_t towlower(wint_t <[c]>);
 
-TRAD_SYNOPSIS
 	#include <wctype.h>
-	wint_t towlower(<[c]>)
-	wint_t <[c]>;
+	wint_t towlower_l(wint_t <[c]>, locale_t <[locale]>);
 
 
 DESCRIPTION
 <<towlower>> is a function which converts uppercase wide characters to
 lowercase, leaving all other characters unchanged.
 
+<<towlower_l>> is like <<towlower>> but performs the function based on the
+locale specified by the locale object locale.  If <[locale]> is
+LC_GLOBAL_LOCALE or not a valid locale object, the behaviour is undefined.
+
 RETURNS
-<<towlower>> returns the lowercase equivalent of <[c]> when it is a
+<<towlower>>, <<towlower_l>> return the lowercase equivalent of <[c]> when it is a
 uppercase wide character; otherwise, it returns the input character.
 
 PORTABILITY
 <<towlower>> is C99.
+<<towlower_l>> is POSIX-1.2008.
 
 No supporting OS subroutines are required.
 */
@@ -67,7 +73,7 @@ No supporting OS subroutines are required.
 #include "local.h"
 
 wint_t
-_DEFUN(towlower,(c), wint_t c)
+towlower (wint_t c)
 {
 #ifdef _MB_CAPABLE
   c = _jp2uc (c);

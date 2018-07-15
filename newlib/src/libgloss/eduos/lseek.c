@@ -35,12 +35,11 @@ extern int errno;
 #include "syscall.h"
 
 int
-_DEFUN (_lseek, (file, ptr, dir),
-        int   file  _AND
-        int   ptr   _AND
+_lseek (int   file,
+        int   ptr,
         int   dir)
 {
-	int ret;	
+	int ret;
 
 	ret = SYSCALL3(__NR_lseek, file, ptr, dir);
 	if (ret < 0) {

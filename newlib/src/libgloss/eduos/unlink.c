@@ -34,8 +34,7 @@ extern int errno;
 #include "warning.h"
 
 int
-_DEFUN (_unlink, (name),
-        char *name)
+_unlink (char *name)
 {
 	errno = ENOENT;
 	return -1;

@@ -100,8 +100,8 @@ case "${host_cpu}" in
 	machine_dir=aarch64
 	libm_machine_dir=aarch64
 	;;
-  arc)
-	machine_dir=
+  arc*)
+	machine_dir=arc
 	;;
   arm*)
 	machine_dir=arm
@@ -140,6 +140,10 @@ case "${host_cpu}" in
 	;;
   frv)
 	machine_dir=frv
+        ;;
+  ft32*)
+        machine_dir=ft32
+        newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED"
         ;;
   h8300)
 	machine_dir=h8300
@@ -251,6 +255,12 @@ case "${host_cpu}" in
   powerpc*)
 	machine_dir=powerpc
 	;;
+  riscv*)
+	libm_machine_dir=riscv
+	machine_dir=riscv
+	newlib_cflags="${newlib_cflags} -DHAVE_NANOSLEEP"
+	default_newlib_atexit_dynamic_alloc="no"
+	;;
   rl78)
 	machine_dir=rl78
 	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED -DSMALL_MEMORY"
@@ -285,6 +295,9 @@ case "${host_cpu}" in
   v850*)
 	machine_dir=v850
 	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED "
+	;;
+  visium)
+	machine_dir=visium
 	;;
   w65*)
 	machine_dir=w65
@@ -370,9 +383,9 @@ esac
 
 case "${host}" in
   *-eduos-elf*)
-	newlib_cflags="${newlib_cflags} -DREENTRANT_SYSCALLS_PROVIDED"
-	sys_dir=
-	;;
+    newlib_cflags="${newlib_cflags} -DREENTRANT_SYSCALLS_PROVIDED"
+    sys_dir=
+    ;;
   *-*-cygwin*)
 	posix_dir=posix
 	stdio64_dir=stdio64
@@ -381,6 +394,11 @@ case "${host}" in
   *-*-netware*)
 	signal_dir=
 	sys_dir=netware
+	;;
+  *-*-phoenix*)
+	sys_dir=phoenix
+	posix_dir=posix
+	unix_dir=unix
 	;;
   *-*-rtems*)			# generic RTEMS support
 	sys_dir=rtems
@@ -394,9 +412,6 @@ case "${host}" in
   a29k-*-*)
 	sys_dir=a29khif
 	signal_dir=
-	;;
-  arc-*-*)
-	sys_dir=arc
 	;;
   arm*-*-*)
 	sys_dir=arm
@@ -427,6 +442,9 @@ case "${host}" in
   frv*)
         sys_dir=
         ;;
+  ft32*)
+        sys_dir=
+        ;;
   h8300-*-hms*)
 	sys_dir=h8300hms
 	;;
@@ -448,6 +466,7 @@ case "${host}" in
   i[34567]86-*-rdos*)
 	sys_dir=rdos
 	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
+	newlib_cflags="${newlib_cflags} -D_I386MACH_DISABLE_HW_INTERRUPTS"
 	;;
   i[34567]86-*-sco*)
 	sys_dir=sysvi386
@@ -466,7 +485,6 @@ case "${host}" in
 	default_newlib_io_pos_args="yes"
 	#newlib_cflags="${newlib_cflags} -Werror" # DEBUGGING ONLY;BREAKS BUILD
 	newlib_cflags="${newlib_cflags} -Wall"
-	newlib_cflags="${newlib_cflags} -D_I386MACH_ALLOW_HW_INTERRUPTS"
 	newlib_cflags="${newlib_cflags} -DHAVE_FCNTL"
 	newlib_cflags="${newlib_cflags} -DHAVE_GETOPT"
 	newlib_cflags="${newlib_cflags} -D_NO_POSIX_SPAWN"
@@ -506,8 +524,10 @@ case "${host}" in
   nios2*)
 	sys_dir=
 	;;
-  or1k-*-* | or1knd-*-*)
-        syscall_dir=syscalls
+  or1k-*-elf | or1knd-*-elf)
+	sys_dir=or1k
+	newlib_cflags="${newlib_cflags} -DREENTRANT_SYSCALLS_PROVIDED "
+	have_crt0="no"
 	;;
   powerpcle-*-pe)
 	posix_dir=posix
@@ -546,6 +566,9 @@ case "${host}" in
           have_crt0="no"
         fi
 	;;
+  visium-*-*)
+	sys_dir=
+	;;
   w65-*-*)
 	sys_dir=w65
 	;;
@@ -567,8 +590,13 @@ case "${host}" in
 	default_newlib_io_long_double="yes"
 	default_newlib_io_pos_args="yes"
 	CC="${CC} -I${cygwin_srcdir}/include"
-	newlib_cflags="${newlib_cflags} -DHAVE_OPENDIR -DHAVE_RENAME -DSIGNAL_PROVIDED -D_COMPILING_NEWLIB -DHAVE_BLKSIZE -DHAVE_FCNTL -DMALLOC_PROVIDED"
+	newlib_cflags="${newlib_cflags} -DHAVE_OPENDIR -DHAVE_RENAME -DGETREENT_PROVIDED -DSIGNAL_PROVIDED -D_COMPILING_NEWLIB -DHAVE_BLKSIZE -DHAVE_FCNTL -DMALLOC_PROVIDED"
 	syscall_dir=syscalls
+	;;
+  *-*-phoenix*)
+	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES -D_COMPILING_NEWLIB -DHAVE_BLKSIZE -DHAVE_NANOSLEEP"
+	default_newlib_io_long_long="yes"
+	syscall_dir=
 	;;
 # RTEMS supplies its own versions of some routines:
 #       malloc()            (reentrant version)
@@ -581,7 +609,7 @@ case "${host}" in
 	default_newlib_io_long_long="yes"
 	default_newlib_io_c99_formats="yes"
 	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
-	newlib_cflags="${newlib_cflags} -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
+newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DGETREENT_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
         # turn off unsupported items in posix directory 
 	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
 	;;
@@ -603,8 +631,9 @@ case "${host}" in
 	default_newlib_io_long_long="yes"
 	syscall_dir=syscalls
 	;;
-  arc-*-*)
+  arc*-*-*)
 	syscall_dir=syscalls
+	default_newlib_io_long_long="yes"
 	;;
   arm*-*-pe)
 	syscall_dir=syscalls
@@ -622,9 +651,6 @@ case "${host}" in
 #         newlib_cflags="${newlib_cflags} -DARM_RDP_MONITOR"
 	  newlib_cflags="${newlib_cflags} -DARM_RDI_MONITOR"
 	fi
-	;;
-  arc*)
-	newlib_cflags="${newlib_cflags} -DREENTRANT_SYSCALLS_PROVIDED"
 	;;
   avr*)
 	newlib_cflags="${newlib_cflags} -DNO_EXEC -DSMALL_MEMORY -DMISSING_SYSCALL_NAMES"
@@ -667,6 +693,9 @@ case "${host}" in
         syscall_dir=syscalls
 	default_newlib_io_long_long="yes"
         ;;
+  ft32*-*-*)
+        syscall_dir=syscalls
+        ;;
   h8300*-*-*)
 	syscall_dir=syscalls	
 	default_newlib_io_long_long="yes"
@@ -684,6 +713,15 @@ case "${host}" in
 	;;
   i[34567]86-*-netware*)
 	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES -DNO_EXEC -DABORT_PROVIDED -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DHAVE_FCNTL"
+	;;
+  i[3-7]86-*-elfiamcu)
+	newlib_cflags="${newlib_cflags} -Os -DPREFER_SIZE_OVER_SPEED -ffunction-sections -fomit-frame-pointer -DREENTRANT_SYSCALL_PROVIDED"
+	if [ "${newlib_multithread}" = "no" ] ; then
+		newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
+	else
+		syscall_dir=syscalls
+		newlib_cflags="${newlib_cflags} -D__DYNAMIC_REENT__"
+	fi
 	;;
   iq2000*)
 	syscall_dir=syscalls
@@ -752,6 +790,9 @@ case "${host}" in
   nds32*)
 	syscall_dir=syscalls
 	;;
+  or1k*|or1knd*)
+	syscall_dir=syscalls
+	;;
   powerpc*-*-eabialtivec*)
 	default_newlib_io_long_long="yes"
 	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
@@ -771,6 +812,9 @@ case "${host}" in
 	;;
   powerpcle-*-pe)
 	newlib_cflags="${newlib_cflags} -DHAVE_OPENDIR -DHAVE_RENAME -DHAVE_FCNTL -D_NO_POSIX_SPAWN"
+	syscall_dir=syscalls
+	;;
+  riscv*-*-*)
 	syscall_dir=syscalls
 	;;
   sh*-*-*)
@@ -800,6 +844,10 @@ case "${host}" in
 	;;
   v850*-*-*)
 	syscall_dir=syscalls
+	;;
+  visium-*-*)
+	newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DHAVE_SYSTEM -DMISSING_SYSCALL_NAMES"
+	syscall_dir=
 	;;
   w65-*-*)
 	syscall_dir=syscalls	
